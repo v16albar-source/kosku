@@ -1,0 +1,445 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.nav-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 12px;background:var(--surface-1);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-btn{padding:4px 10px;font-size:11px;border:0.5px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:all .15s}
+.nav-btn:hover{background:var(--surface-1);color:var(--text-primary)}
+.nav-btn.active{background:#4F46E5;color:#fff;border-color:#4F46E5}
+.layer{display:none;padding:0}
+.layer.active{display:block}
+
+/* Sidebar */
+.sidebar{width:180px;background:#3730A3;min-height:100%;padding:12px 0;flex-shrink:0}
+.sidebar-logo{padding:12px 16px 16px;color:#fff;font-weight:500;font-size:13px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:8px}
+.sidebar-logo span{display:block;font-size:10px;opacity:.7;font-weight:400}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:7px 16px;color:rgba(255,255,255,.75);font-size:12px;cursor:pointer;transition:background .15s}
+.sidebar-item:hover{background:rgba(255,255,255,.1)}
+.sidebar-item.active{background:#4F46E5;color:#fff}
+.sidebar-item i{font-size:15px;width:16px}
+
+/* Layout shell */
+.shell{display:flex;min-height:600px;background:var(--surface-0)}
+.main{flex:1;overflow:hidden}
+.topbar{padding:12px 20px;background:var(--surface-2);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.topbar h2{font-size:15px;font-weight:500;color:var(--text-primary)}
+.content{padding:16px 20px}
+
+/* Cards / UI */
+.stat-card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px}
+.stat-num{font-size:22px;font-weight:500;color:var(--text-primary)}
+.stat-label{font-size:11px;color:var(--text-muted)}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:10px;padding:14px}
+.card h3{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:10px}
+.tbl{width:100%;font-size:11.5px;border-collapse:collapse}
+.tbl th{color:var(--text-muted);font-weight:500;text-align:left;padding:5px 8px;border-bottom:0.5px solid var(--border)}
+.tbl td{padding:5px 8px;border-bottom:0.5px solid var(--border);color:var(--text-primary)}
+.tbl tr:last-child td{border:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.badge-green{background:#D1FAE5;color:#065F46}
+.badge-red{background:#FEE2E2;color:#991B1B}
+.badge-yellow{background:#FEF3C7;color:#92400E}
+.badge-blue{background:#DBEAFE;color:#1E40AF}
+.badge-purple{background:#EDE9FE;color:#5B21B6}
+.btn{padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;border:none;font-weight:500}
+.btn-primary{background:#4F46E5;color:#fff}
+.btn-secondary{background:var(--surface-1);border:0.5px solid var(--border);color:var(--text-primary)}
+.btn-sm{padding:4px 10px;font-size:11px;border-radius:5px}
+.btn-green{background:#059669;color:#fff}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:11.5px;color:var(--text-secondary);margin-bottom:4px;font-weight:500}
+.form-control{width:100%;padding:7px 10px;border:0.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--surface-2);color:var(--text-primary)}
+.notif-item{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);align-items:flex-start}
+.notif-item:last-child{border:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.section-title{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--border)}
+.avatar{width:32px;height:32px;border-radius:50%;background:#4F46E5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:500;flex-shrink:0}
+.row-action{display:flex;gap:4px}
+.login-wrap{min-height:600px;background:linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%);display:flex;align-items:center;justify-content:center}
+.login-card{background:var(--surface-2);border:0.5px solid var(--border);border-radius:14px;padding:28px 28px;width:340px}
+</style>
+
+<div class="nav-bar" id="nav"></div>
+<div id="layers"></div>
+
+<script>
+const layers = [
+  {id:'login',label:'1. Login',icon:'ti-login'},
+  {id:'dashboard',label:'2. Dashboard',icon:'ti-layout-dashboard'},
+  {id:'penghuni',label:'3. Data Penghuni',icon:'ti-users'},
+  {id:'kamar',label:'4. Data Kamar',icon:'ti-door'},
+  {id:'cash',label:'5. Input Cash',icon:'ti-cash'},
+  {id:'transfer',label:'6. Verif Transfer',icon:'ti-transfer'},
+  {id:'laporan',label:'7. Lap. Bayar',icon:'ti-report'},
+  {id:'tunggakan',label:'8. Lap. Tunggakan',icon:'ti-alert-circle'},
+  {id:'keluar',label:'9. Penghuni Keluar',icon:'ti-door-exit'},
+  {id:'pindah',label:'10. Pindah Kamar',icon:'ti-arrows-transfer-down'},
+  {id:'notif',label:'11. Notifikasi',icon:'ti-bell'},
+  {id:'profil',label:'12. Profil',icon:'ti-user-circle'},
+  {id:'pengaturan',label:'13. Pengaturan',icon:'ti-settings'},
+  {id:'infobayar',label:'14. Info Bayar',icon:'ti-credit-card'},
+  {id:'peraturan',label:'15. Peraturan Kos',icon:'ti-clipboard-list'},
+];
+
+const sidebarItems = [
+  {icon:'ti-layout-dashboard',label:'Dashboard'},
+  {icon:'ti-users',label:'Data Penghuni'},
+  {icon:'ti-door',label:'Data Kamar'},
+  {icon:'ti-cash',label:'Input Pembayaran'},
+  {icon:'ti-transfer',label:'Verifikasi Transfer'},
+  {icon:'ti-report',label:'Laporan Pembayaran'},
+  {icon:'ti-alert-circle',label:'Laporan Tunggakan'},
+  {icon:'ti-door-exit',label:'Data Penghuni Keluar'},
+  {icon:'ti-bell',label:'Notifikasi'},
+  {icon:'ti-user-circle',label:'Profil'},
+  {icon:'ti-settings',label:'Pengaturan'},
+  {icon:'ti-logout',label:'Logout'},
+];
+
+function sidebar(activeLabel) {
+  return `<div class="sidebar">
+    <div class="sidebar-logo">KOSKU<span>Pemilik Kos</span></div>
+    ${sidebarItems.map(s=>`<div class="sidebar-item${s.label===activeLabel?' active':''}"><i class="ti ${s.icon}" aria-hidden="true"></i><span>${s.label}</span></div>`).join('')}
+  </div>`;
+}
+
+function shell(title, activeMenu, content) {
+  return `<div class="shell">
+    ${sidebar(activeMenu)}
+    <div class="main">
+      <div class="topbar"><h2>${title}</h2><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--text-muted)">Pemilik Kos</span><div class="avatar" style="width:28px;height:28px;font-size:11px">PK</div></div></div>
+      <div class="content">${content}</div>
+    </div>
+  </div>`;
+}
+
+const html = {
+
+login: `<div class="login-wrap">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:52px;height:52px;background:#4F46E5;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:#fff;font-size:22px"><i class="ti ti-home" aria-hidden="true"></i></div>
+      <div style="font-size:16px;font-weight:500;color:var(--text-primary)">Sistem Informasi Pembayaran Kos</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Login Pemilik (Admin)</div>
+    </div>
+    <div class="form-group"><label>Username / Email</label><div style="position:relative"><i class="ti ti-user" style="position:absolute;left:9px;top:8px;color:var(--text-muted);font-size:15px" aria-hidden="true"></i><input class="form-control" style="padding-left:28px" placeholder="Username / Email"></div></div>
+    <div class="form-group"><label>Password</label><div style="position:relative"><i class="ti ti-lock" style="position:absolute;left:9px;top:8px;color:var(--text-muted);font-size:15px" aria-hidden="true"></i><input class="form-control" style="padding-left:28px" type="password" placeholder="Password"></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:12px">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"> Ingat saya</label>
+      <a style="color:#4F46E5;text-decoration:none">Lupa password?</a>
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:9px">Masuk</button>
+    <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px"><i class="ti ti-shield-check" aria-hidden="true"></i> Sistem aman dan terpercaya</div>
+  </div>
+</div>`,
+
+dashboard: shell('Dashboard','Dashboard',`
+  <div class="grid4" style="margin-bottom:14px">
+    <div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="stat-label">Total Penghuni</div><div class="stat-num">32</div><div style="font-size:10px;color:var(--text-muted)">Orang</div></div><div class="stat-icon" style="background:#EDE9FE;color:#5B21B6"><i class="ti ti-users" aria-hidden="true"></i></div></div></div>
+    <div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="stat-label">Kamar Terisi</div><div class="stat-num">24</div><div style="font-size:10px;color:var(--text-muted)">Kamar</div></div><div class="stat-icon" style="background:#DBEAFE;color:#1E40AF"><i class="ti ti-door" aria-hidden="true"></i></div></div></div>
+    <div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="stat-label">Kamar Kosong</div><div class="stat-num">8</div><div style="font-size:10px;color:var(--text-muted)">Kamar</div></div><div class="stat-icon" style="background:#FEF3C7;color:#92400E"><i class="ti ti-door-off" aria-hidden="true"></i></div></div></div>
+    <div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="stat-label">Total Tagihan Bulan Ini</div><div class="stat-num" style="font-size:16px">Rp 12.500.000</div></div><div class="stat-icon" style="background:#D1FAE5;color:#065F46"><i class="ti ti-currency-dollar" aria-hidden="true"></i></div></div></div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <h3>Ringkasan Pembayaran</h3>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="width:80px;height:80px;border-radius:50%;border:8px solid #4F46E5;border-top-color:#E5E7EB;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--text-primary)">70%</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:10px;height:10px;background:#4F46E5;border-radius:2px"></div><span style="font-size:11.5px;color:var(--text-secondary)">Lunas Rp 8.750.000</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:#E5E7EB;border-radius:2px"></div><span style="font-size:11.5px;color:var(--text-secondary)">Belum Lunas Rp 3.750.000</span></div>
+          <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">Belum Lunas: 7 Penghuni</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Notifikasi Terbaru</h3>
+      <div class="notif-item"><div class="notif-dot" style="background:#059669"></div><div><div style="font-size:11.5px;color:var(--text-primary)">Siti Asyah melakukan pembayaran</div><div style="font-size:10px;color:var(--text-muted)">15/05/2024 10:15</div></div></div>
+      <div class="notif-item"><div class="notif-dot" style="background:#DC2626"></div><div><div style="font-size:11.5px;color:var(--text-primary)">Andi Saputra telat bayar 3 hari</div><div style="font-size:10px;color:var(--text-muted)">15/05/2024 09:00</div></div></div>
+      <div class="notif-item"><div class="notif-dot" style="background:#D97706"></div><div><div style="font-size:11.5px;color:var(--text-primary)">Dewi Lestari upload bukti pembayaran</div><div style="font-size:10px;color:var(--text-muted)">15/05/2024 08:45</div></div></div>
+      <div style="margin-top:8px"><a style="font-size:11px;color:#4F46E5;cursor:pointer">Lihat semua notifikasi →</a></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0">Transfer Menunggu Verifikasi</h3><span class="badge badge-yellow">2 Transaksi</span>
+    </div>
+    <table class="tbl"><thead><tr><th>Nama</th><th>Kamar</th><th>Jumlah</th><th>Waktu</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <tr><td>Rina Handayani</td><td>A4</td><td>Rp 500.000</td><td>15/05 08:20</td><td><div class="row-action"><button class="btn btn-sm btn-green">✓</button><button class="btn btn-sm btn-secondary">✕</button></div></td></tr>
+      <tr><td>Dewi Lestari</td><td>B4</td><td>Rp 500.000</td><td>15/05 08:45</td><td><div class="row-action"><button class="btn btn-sm btn-green">✓</button><button class="btn btn-sm btn-secondary">✕</button></div></td></tr>
+    </tbody></table>
+  </div>`),
+
+penghuni: shell('Data Penghuni','Data Penghuni',`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="position:relative"><i class="ti ti-search" style="position:absolute;left:9px;top:8px;color:var(--text-muted);font-size:14px" aria-hidden="true"></i><input class="form-control" style="padding-left:28px;width:220px" placeholder="Cari nama penghuni..."></div>
+    <button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i> Tambah Penghuni</button>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>No</th><th>Foto</th><th>Nama</th><th>No HP</th><th>Kamar</th><th>Tgl Masuk</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><div class="avatar">BS</div></td><td>Budi Santoso</td><td>0812345678</td><td>A1</td><td>01/01/2024</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>2</td><td><div class="avatar" style="background:#059669">SA</div></td><td>Siti Aisyah</td><td>0812345679</td><td>A2</td><td>05/01/2024</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>3</td><td><div class="avatar" style="background:#D97706">AS</div></td><td>Andi Saputra</td><td>0812345680</td><td>B3</td><td>10/01/2024</td><td><span class="badge badge-red">Tunggakan</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>4</td><td><div class="avatar" style="background:#DC2626">DL</div></td><td>Dewi Lestari</td><td>0812345681</td><td>B4</td><td>15/01/2024</td><td><span class="badge badge-yellow">Menunggu</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>5</td><td><div class="avatar" style="background:#7C3AED">FN</div></td><td>Fajar Nugroho</td><td>0812345682</td><td>A3</td><td>20/01/2024</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+    </tbody></table>
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px">
+      <button class="btn btn-sm btn-secondary">‹</button>
+      <button class="btn btn-sm btn-primary">1</button>
+      <button class="btn btn-sm btn-secondary">2</button>
+      <button class="btn btn-sm btn-secondary">›</button>
+    </div>
+  </div>`),
+
+kamar: shell('Data Kamar','Data Kamar',`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="position:relative"><i class="ti ti-search" style="position:absolute;left:9px;top:8px;color:var(--text-muted);font-size:14px" aria-hidden="true"></i><input class="form-control" style="padding-left:28px;width:220px" placeholder="Cari kamar..."></div>
+    <button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i> Tambah Kamar</button>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>No</th><th>Nomor Kamar</th><th>Tipe Kamar</th><th>Harga / Bulan</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>A1</td><td>Standar</td><td>Rp 500.000</td><td><span class="badge badge-blue">Terisi</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>2</td><td>A2</td><td>Standar</td><td>Rp 500.000</td><td><span class="badge badge-blue">Terisi</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>3</td><td>A3</td><td>Standar</td><td>Rp 500.000</td><td><span class="badge badge-yellow">Kosong</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>4</td><td>B1</td><td>VIP</td><td>Rp 700.000</td><td><span class="badge badge-blue">Terisi</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td>5</td><td>B2</td><td>VIP</td><td>Rp 700.000</td><td><span class="badge badge-red">Perbaikan</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+    </tbody></table>
+  </div>`),
+
+cash: shell('Input Pembayaran (Cash)','Input Pembayaran',`
+  <div style="max-width:480px">
+    <div class="card">
+      <h3>Input Pembayaran (Cash)</h3>
+      <div class="form-group"><label>Pilih Penghuni</label><select class="form-control"><option>Pilih penghuni</option><option>Budi Santoso – A1</option><option>Siti Aisyah – A2</option></select></div>
+      <div class="form-group"><label>Kamar</label><input class="form-control" value="A1 – Budi Santoso" readonly></div>
+      <div class="form-group"><label>Bulan</label><select class="form-control"><option>Mei 2024</option></select></div>
+      <div class="form-group"><label>Jumlah Tagihan</label><input class="form-control" value="Rp 500.000" readonly></div>
+      <div class="form-group"><label>Jumlah Bayar</label><input class="form-control" value="Rp 500.000"></div>
+      <div class="form-group"><label>Tanggal Bayar</label><input class="form-control" type="date" value="2024-05-15"></div>
+      <div class="form-group"><label>Metode Pembayaran</label><select class="form-control"><option>Cash</option></select></div>
+      <div class="form-group"><label>Keterangan</label><input class="form-control" value="Pembayaran cash"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-secondary" style="flex:1">Batal</button>
+        <button class="btn btn-primary" style="flex:1">Simpan</button>
+      </div>
+    </div>
+  </div>`),
+
+transfer: shell('Verifikasi Pembayaran (Transfer)','Verifikasi Pembayaran (Transfer)',`
+  <div style="display:flex;gap:10px;margin-bottom:14px">
+    <div class="stat-card" style="flex:1"><div style="font-size:11px;color:var(--text-muted)">Menunggu Verifikasi</div><div class="stat-num">8</div></div>
+    <div class="stat-card" style="flex:1;border-color:#059669"><div style="font-size:11px;color:var(--text-muted)">Terverifikasi</div><div class="stat-num" style="color:#059669">15</div></div>
+    <div class="stat-card" style="flex:1;border-color:#DC2626"><div style="font-size:11px;color:var(--text-muted)">Ditolak</div><div class="stat-num" style="color:#DC2626">2</div></div>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>No</th><th>Nama Penghuni</th><th>Kamar</th><th>Bulan</th><th>Jumlah</th><th>Metode</th><th>Tgl Upload</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Dewi Lestari</td><td>B4</td><td>Mei 2024</td><td>Rp 500.000</td><td>Transfer</td><td>15/05 08:45</td><td><div class="row-action"><button class="btn btn-sm btn-green">✓</button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B">✕</button></div></td></tr>
+      <tr><td>2</td><td>Fajar Nugroho</td><td>A3</td><td>Mei 2024</td><td>Rp 500.000</td><td>Transfer</td><td>15/05 08:30</td><td><div class="row-action"><button class="btn btn-sm btn-green">✓</button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B">✕</button></div></td></tr>
+      <tr><td>3</td><td>Andi Saputra</td><td>B3</td><td>Mei 2024</td><td>Rp 500.000</td><td>Transfer</td><td>15/05 07:50</td><td><div class="row-action"><button class="btn btn-sm btn-green">✓</button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B">✕</button></div></td></tr>
+      <tr><td>4</td><td>Siti Aisyah</td><td>A2</td><td>Mei 2024</td><td>Rp 500.000</td><td>Transfer</td><td>15/05 07:30</td><td><div class="row-action"><button class="btn btn-sm btn-green">✓</button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B">✕</button></div></td></tr>
+    </tbody></table>
+    <div style="margin-top:10px"><a style="font-size:12px;color:#4F46E5;cursor:pointer">Lihat Semua →</a></div>
+  </div>`),
+
+laporan: shell('Laporan Pembayaran','Laporan Pembayaran',`
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px">Bulan</label><select class="form-control" style="width:110px"><option>Mei</option></select></div>
+      <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px">Tahun</label><select class="form-control" style="width:90px"><option>2024</option></select></div>
+      <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px">Metode</label><select class="form-control" style="width:100px"><option>Semua</option></select></div>
+      <div style="display:flex;gap:6px;margin-top:16px">
+        <button class="btn btn-primary">Tampilkan</button>
+        <button class="btn btn-sm" style="background:#059669;color:#fff;padding:6px 14px;font-size:12px;border-radius:7px"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> Export Excel</button>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;font-weight:500;font-size:13px;color:var(--text-primary)">Total Pemasukan: <span style="color:#4F46E5">Rp 8.750.000</span></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>No</th><th>Metode</th><th>Jumlah Transaksi</th><th>Total Pemasukan</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Cash</td><td>8</td><td>Rp 4.000.000</td></tr>
+      <tr><td>2</td><td>Transfer</td><td>15</td><td>Rp 4.750.000</td></tr>
+    </tbody></table>
+  </div>`),
+
+tunggakan: shell('Laporan Tunggakan','Laporan Tunggakan',`
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;gap:10px;align-items:center">
+      <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px">Bulan</label><select class="form-control" style="width:110px"><option>Mei</option></select></div>
+      <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px">Tahun</label><select class="form-control" style="width:90px"><option>2024</option></select></div>
+      <button class="btn btn-primary" style="margin-top:16px">Tampilkan</button>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;font-weight:500;font-size:13px;color:#DC2626">Total Tunggakan: Rp 2.000.000 (4 Penghuni)</div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>No</th><th>Nama Penghuni</th><th>Kamar</th><th>Tunggakan</th><th>Telat (Hari)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Andi Saputra</td><td>B3</td><td>Rp 500.000</td><td><span class="badge badge-red">5</span></td></tr>
+      <tr><td>2</td><td>Rina Handayani</td><td>A4</td><td>Rp 500.000</td><td><span class="badge badge-yellow">4</span></td></tr>
+      <tr><td>3</td><td>Joko Prasetyo</td><td>B2</td><td>Rp 500.000</td><td><span class="badge badge-yellow">3</span></td></tr>
+      <tr><td>4</td><td>Dinda Lestari</td><td>C1</td><td>Rp 500.000</td><td><span class="badge badge-blue">2</span></td></tr>
+    </tbody></table>
+  </div>`),
+
+keluar: shell('Data Penghuni Keluar','Data Penghuni Keluar',`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="position:relative"><i class="ti ti-search" style="position:absolute;left:9px;top:8px;color:var(--text-muted);font-size:14px" aria-hidden="true"></i><input class="form-control" style="padding-left:28px;width:220px" placeholder="Cari nama penghuni..."></div>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>No</th><th>Nama Penghuni</th><th>Kamar</th><th>Tanggal Masuk</th><th>Tanggal Keluar</th><th>Alasan Keluar</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Ahmad Hermawan</td><td>C1</td><td>01/10/2023</td><td>01/01/2024</td><td>Pindah Kerja</td><td><button class="btn btn-sm btn-secondary"><i class="ti ti-eye" aria-hidden="true"></i></button></td></tr>
+      <tr><td>2</td><td>Linda Wati</td><td>A2</td><td>05/06/2023</td><td>28/01/2024</td><td>Pulang Kampung</td><td><button class="btn btn-sm btn-secondary"><i class="ti ti-eye" aria-hidden="true"></i></button></td></tr>
+      <tr><td>3</td><td>Wahyu Setiawan</td><td>B1</td><td>10/08/2023</td><td>10/02/2024</td><td>Ekonomi</td><td><button class="btn btn-sm btn-secondary"><i class="ti ti-eye" aria-hidden="true"></i></button></td></tr>
+      <tr><td>4</td><td>Mega Sari</td><td>D2</td><td>01/09/2023</td><td>25/03/2024</td><td>Pindah Kerja</td><td><button class="btn btn-sm btn-secondary"><i class="ti ti-eye" aria-hidden="true"></i></button></td></tr>
+      <tr><td>5</td><td>Yoga Pratama</td><td>A3</td><td>15/06/2023</td><td>28/03/2024</td><td>Kerja di Luar Kota</td><td><button class="btn btn-sm btn-secondary"><i class="ti ti-eye" aria-hidden="true"></i></button></td></tr>
+    </tbody></table>
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px">
+      <button class="btn btn-sm btn-secondary">‹</button>
+      <button class="btn btn-sm btn-primary">1</button>
+      <button class="btn btn-sm btn-secondary">2</button>
+      <button class="btn btn-sm btn-secondary">›</button>
+    </div>
+  </div>`),
+
+pindah: shell('Keluar / Pindah Penghuni','Data Penghuni Keluar',`
+  <div style="max-width:480px">
+    <div class="card">
+      <h3>Keluar / Pindah Penghuni</h3>
+      <div class="form-group"><label>Pilih Penghuni</label><select class="form-control"><option>Siti Aisyah (A2)</option><option>Budi Santoso (A1)</option></select></div>
+      <div class="form-group"><label>Tanggal Masuk</label><input class="form-control" value="05/01/2024" readonly></div>
+      <div class="form-group"><label>Tanggal Keluar</label><input class="form-control" type="date" value="2024-05-15"></div>
+      <div class="form-group"><label>Alasan Keluar</label><select class="form-control"><option>Pindah Kerja</option><option>Pulang Kampung</option><option>Ekonomi</option></select></div>
+      <div class="form-group"><label>Kondisi Kamar</label><select class="form-control"><option>Baik</option><option>Ada Kerusakan</option></select></div>
+      <div class="form-group"><label>Catatan</label><textarea class="form-control" rows="2" style="resize:none">Kunci sudah dikembalikan.</textarea></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-secondary" style="flex:1">Batal</button>
+        <button class="btn btn-primary" style="flex:1">Simpan & Keluar</button>
+      </div>
+    </div>
+  </div>`),
+
+notif: shell('Notifikasi','Notifikasi',`
+  <div class="card">
+    <h3>Semua Notifikasi</h3>
+    <div class="notif-item"><div class="notif-dot" style="background:#059669"></div><div style="flex:1"><div style="font-size:12.5px;color:var(--text-primary)">Dewi Lestari upload bukti pembayaran.</div><div style="font-size:10.5px;color:var(--text-muted)">15/05/2024 08:45</div></div></div>
+    <div class="notif-item"><div class="notif-dot" style="background:#059669"></div><div style="flex:1"><div style="font-size:12.5px;color:var(--text-primary)">Siti Aisyah melakukan pembayaran cash.</div><div style="font-size:10.5px;color:var(--text-muted)">15/05/2024 07:55</div></div></div>
+    <div class="notif-item"><div class="notif-dot" style="background:#DC2626"></div><div style="flex:1"><div style="font-size:12.5px;color:var(--text-primary)">Andi Saputra telat bayar 3 hari.</div><div style="font-size:10.5px;color:var(--text-muted)">15/05/2024 07:30</div></div></div>
+    <div class="notif-item"><div class="notif-dot" style="background:#059669"></div><div style="flex:1"><div style="font-size:12.5px;color:var(--text-primary)">Fajar Nugroho upload bukti pembayaran.</div><div style="font-size:10.5px;color:var(--text-muted)">14/05/2024 21:10</div></div></div>
+    <div class="notif-item"><div class="notif-dot" style="background:#4F46E5"></div><div style="flex:1"><div style="font-size:12.5px;color:var(--text-primary)">Pembayaran dari Rina Handayani telah diverifikasi.</div><div style="font-size:10.5px;color:var(--text-muted)">14/05/2024 19:05</div></div></div>
+    <div class="notif-item"><div class="notif-dot" style="background:#D97706"></div><div style="flex:1"><div style="font-size:12.5px;color:var(--text-primary)">Joko Prasetyo belum membayar untuk bulan ini.</div><div style="font-size:10.5px;color:var(--text-muted)">13/05/2024 09:00</div></div></div>
+  </div>`),
+
+profil: shell('Profil','Profil',`
+  <div style="max-width:400px">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="width:72px;height:72px;border-radius:50%;background:#4F46E5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:500;margin:0 auto 10px">BS</div>
+        <div style="font-size:15px;font-weight:500">Budi Santoso</div>
+        <div style="font-size:11px;color:var(--text-muted)">Pemilik Kos</div>
+      </div>
+      <div class="section-title">Profil Pemilik Kos</div>
+      <table style="width:100%;font-size:12.5px">
+        <tr><td style="color:var(--text-muted);padding:5px 0;width:110px">Nama Lengkap</td><td style="font-weight:500">Budi Santoso</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">Username</td><td>pemilikkos</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">Email</td><td>budi@email.com</td></tr>
+        <tr><td style="color:var(--text-muted);padding:5px 0">No. HP</td><td>08123456780</td></tr>
+      </table>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px">Ubah Password</button>
+    </div>
+  </div>`),
+
+pengaturan: shell('Pengaturan','Pengaturan',`
+  <div style="max-width:500px">
+    <div class="card" style="margin-bottom:10px">
+      <div class="section-title">Informasi Kos</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);cursor:pointer"><span style="font-size:13px">Nama dan Alamat Kos</span><i class="ti ti-chevron-right" style="color:var(--text-muted)" aria-hidden="true"></i></div>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="section-title">Informasi Pembayaran</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);cursor:pointer"><span style="font-size:13px">Akun rekening &amp; metode pembayaran</span><i class="ti ti-chevron-right" style="color:var(--text-muted)" aria-hidden="true"></i></div>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="section-title">Peraturan Kos</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);cursor:pointer"><span style="font-size:13px">Kelola peraturan kos</span><i class="ti ti-chevron-right" style="color:var(--text-muted)" aria-hidden="true"></i></div>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="section-title">Laporan Pembayaran</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);cursor:pointer"><span style="font-size:13px">Unduh laporan keuangan</span><i class="ti ti-chevron-right" style="color:var(--text-muted)" aria-hidden="true"></i></div>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="section-title">Notifikasi</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);cursor:pointer"><span style="font-size:13px">Atur preferensi notifikasi</span><i class="ti ti-chevron-right" style="color:var(--text-muted)" aria-hidden="true"></i></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Backup Data</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;cursor:pointer"><span style="font-size:13px">Backup data sistem</span><i class="ti ti-chevron-right" style="color:var(--text-muted)" aria-hidden="true"></i></div>
+    </div>
+  </div>`),
+
+infobayar: shell('Informasi Pembayaran','Pengaturan',`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:500">Informasi Pembayaran untuk Penghuni</div>
+    <button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i> Tambah Rekening</button>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Metode Pembayaran</th><th>Atas Nama</th><th>Nomor / ID</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <tr><td><div style="display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;background:#003087;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700">BCA</div>BCA</div></td><td>Budi Santoso</td><td>1234 5678 9012 3456</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td><div style="display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;background:#F37321;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:7px;font-weight:700">BRI</div>BRI</div></td><td>Budi Santoso</td><td>5678 9012 3456 7890</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td><div style="display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;background:#00A0E3;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:6px;font-weight:700">DANA</div>DANA</div></td><td>Budi Santoso</td><td>0813 3456 7890</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+      <tr><td><div style="display:flex;align-items:center;gap:6px"><div style="width:22px;height:22px;background:#009933;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:7px;font-weight:700">OVO</div>OVO</div></td><td>Budi Santoso</td><td>0812 3456 7890</td><td><span class="badge badge-green">Aktif</span></td><td><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>
+    </tbody></table>
+  </div>`),
+
+peraturan: shell('Peraturan Kos','Pengaturan',`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:500">Peraturan Kos</div>
+    <button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i> Tambah Peraturan</button>
+  </div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${[
+        'Pembayaran kos dilakukan paling lambat tanggal 10 setiap bulan.',
+        'Keterlambatan pembayaran dikenakan denda Rp 10.000 per hari.',
+        'Tamu menginap wajib melapor kepada pemilik kos.',
+        'Dilarang membuat keributan setelah pukul 22.00 WIB.',
+        'Menjaga kebersihan kamar dan lingkungan kos.',
+        'Dilarang membawa barang terlarang.',
+        'Kerusakan fasilitas akibat kelalaian penghuni menjadi tanggung jawab penghuni.',
+        'Penghuni wajib menjaga keamanan dan kenyamanan bersama.',
+      ].map((r,i)=>`<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="min-width:20px;height:20px;background:#EDE9FE;color:#5B21B6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0">${i+1}</span><span style="font-size:12.5px;color:var(--text-primary);flex:1">${r}</span><div class="row-action"><button class="btn btn-sm btn-secondary"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B"><i class="ti ti-trash" aria-hidden="true"></i></button></div></div>`).join('')}
+    </div>
+  </div>`),
+};
+
+const nav = document.getElementById('nav');
+const layersDiv = document.getElementById('layers');
+
+layers.forEach((l,idx)=>{
+  const btn = document.createElement('button');
+  btn.className = 'nav-btn' + (idx===0?' active':'');
+  btn.innerHTML = `<i class="ti ${l.icon}" aria-hidden="true"></i> ${l.label}`;
+  btn.onclick = ()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.layer').forEach(lv=>lv.classList.remove('active'));
+    document.getElementById('layer-'+l.id).classList.add('active');
+  };
+  nav.appendChild(btn);
+
+  const div = document.createElement('div');
+  div.className = 'layer' + (idx===0?' active':'');
+  div.id = 'layer-'+l.id;
+  div.innerHTML = html[l.id] || '<div style="padding:20px;color:var(--text-muted)">Layer ini sedang dalam pengembangan.</div>';
+  layersDiv.appendChild(div);
+});
+</script>
